@@ -34,29 +34,31 @@ module.exports = {
           .readFileSync(listPath, "utf-8")
           .split("\n")
           .filter((url) => url.trim() !== "");
-
         for (const url of urls) {
           try {
             const failedResources = [];
 
             page.on("requestfailed", (request) => {
               const url = request.url();
+              if (request.failure()) {
               const failure = {
                 url,
                 failureText: request.failure().errorText,
               };
               failedResources.push(failure);
+              }
             });
             await page.goto(url);
             await interaction.followUp(`**Testing ${url}**`);
             let report = "";
 
             failedResources.forEach((resource) => {
-              report += `**URL**: ${url} - **Resource**: ${resource.url} - **Reason**: \`${resource.failureText}\`\n`;
+              report = `**URL**: ${url} - **Resource**: ${resource.url} - **Reason**: \`${resource.failureText}\`\n`;
             });
             if (report) {
               interaction.followUp(report);
             }
+
           } catch (error) {
             await interaction.followUp(
               `couldn't load \`${url}\`, check console for errors.`
@@ -64,6 +66,7 @@ module.exports = {
             console.error(`${url}:`, error);
           }
         }
+
 
         await browser.close();
       } catch (error) {
