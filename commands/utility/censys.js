@@ -10,20 +10,34 @@ module.exports = {
         .setName("target")
         .setDescription("Target domain, e.g hackerone.com")
         .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("output")
+        .setDescription("File name to save output (optional)")
+        .setRequired(false)
     ),
   async execute(interaction) {
     await interaction.deferReply();
     const target = interaction.options.getString("target");
+    const output = interaction.options.getString("output");
+
     try {
-        exec(`censys search ${target} | grep "ip" | egrep -v "description" | cut -d \":\" -f2 | tr -d "\\"\\,"`, (error, stdout, stderr) => {
+      let command = `censys search ${target} | grep "ip" | egrep -v "description" | cut -d ":" -f2 | tr -d "\\"\\,"`;
+
+      if (output) {
+        command += ` | tee ${output}`;
+      }
+
+      exec(command, (error, stdout, stderr) => {
         if (error) {
           console.error("Error:", error);
-          interaction.editReply("error while executing the command, check console.");
+          interaction.editReply("Error while executing the command, check console.");
           return;
         }
         if (stderr) {
           console.error("stderr:", stderr);
-          interaction.editReply("stderr, check console.");
+          interaction.editReply("Stderr, check console.");
           return;
         }
         const ips = stdout.trim().split('\n').map(ip => ip.trim());
