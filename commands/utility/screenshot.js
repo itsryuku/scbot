@@ -48,7 +48,9 @@ module.exports = {
 
         for (const url of urls) {
           try {
-            const response = await page.goto(url);
+            const response = await page.goto(url, {
+              waitUntil: "networkidle0",
+            });
             const statusCode = response.status();
             const hostname = new URL(url).hostname;
             const outputPath = `./output/${hostname}.png`;
