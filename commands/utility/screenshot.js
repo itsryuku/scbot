@@ -18,10 +18,16 @@ module.exports = {
         .setName("list")
         .setDescription("file containing the list of hosts")
         .setRequired(true)
-    ),
+    ).addBooleanOption((option) =>
+      option
+    .setName("verbose")
+    .setDescription("verbose mode will also send a message if a url failed to load.")
+    .setRequired(false)
+  ),
   async execute(interaction) {
     await interaction.deferReply();
     const listPath = interaction.options.getString("list");
+    const verbose = interaction.options.getBoolean("verbose");
 
     fs.access(listPath, fs.constants.F_OK, async (err) => {
       if (err) {
@@ -70,9 +76,11 @@ module.exports = {
             }
             statusCodes[statusCode].push(hostname);
           } catch (error) {
-            await interaction.followUp(
-              `couldn't screenshot \`${url}\`, check console for errors.`
-            );
+            if (verbose) {
+              await interaction.followUp(
+                `couldn't screenshot \`${url}\`, check console for errors.`
+              );
+            };
             console.error(`error while taking screenshot of ${url}:`, error);
           }
         }
