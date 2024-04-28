@@ -39,7 +39,7 @@ module.exports = {
           headless: true,
           ignoreHTTPSErrors: true,
           ignoreDefaultArgs: ["--ignore-certificate-errors"],
-          timeout: 30000,
+          timeout: 10000,
         });
         const page = await browser.newPage();
 
